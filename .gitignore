@@ -1,0 +1,18 @@
+# Repo-wide view of what must never be committed. backend/ and frontend/
+# keep their own, more detailed .gitignore files.
+
+# Local environment and secrets (.env.example stays tracked)
+.env
+.env.backup
+.env.production
+
+# Local SQLite database
+backend/database/*.sqlite*
+
+# Uploaded screenshots
+backend/storage/app/public/*
+!backend/storage/app/public/.gitignore
+
+# Dependencies
+backend/vendor/
+frontend/node_modules/
