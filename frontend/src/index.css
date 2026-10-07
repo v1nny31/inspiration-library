@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+/* Black and white, with Discord-style accents: blurple for actions and
+   selection, red for anything that deletes. */
+@theme {
+  --color-blurple: #5865f2;
+  --color-blurple-hover: #4752c4;
+  /* Readable as small text on the dark background. */
+  --color-blurple-light: #949cf7;
+  --color-danger: #ed4245;
+
+  /* Soft glows so the accents don't look flat. */
+  --shadow-glow-blurple: 0 0 28px -4px rgb(88 101 242 / 0.7);
+  --shadow-glow-blurple-sm: 0 0 14px -2px rgb(88 101 242 / 0.5);
+  --shadow-glow-danger: 0 0 22px -4px rgb(237 66 69 / 0.65);
+  --text-shadow-glow-blurple: 0 0 12px rgb(88 101 242 / 0.8);
+
+  --animate-fade-in: fade-in 0.4s ease-out both;
+  --animate-fade-in-up: fade-in-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-pop-in: pop-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.97);
+    }
+  }
+}
+
+/* The sticky page header publishes its height as --header-h (see PageHeader).
+   Side indexes stick just below it, and jumping to a section stops below it. */
+@utility sticky-under-header {
+  position: sticky;
+  top: calc(var(--header-h, 9rem) + 2rem);
+  max-height: calc(100vh - var(--header-h, 9rem) - 4rem);
+  overflow-y: auto;
+}
+
+@utility anchor-under-header {
+  scroll-margin-top: calc(var(--header-h, 9rem) + 1.5rem);
+}
+
+/* Children fade in one after another. */
+@utility stagger {
+  & > * {
+    animation: var(--animate-fade-in-up);
+  }
+  & > :nth-child(2) { animation-delay: 60ms; }
+  & > :nth-child(3) { animation-delay: 120ms; }
+  & > :nth-child(4) { animation-delay: 180ms; }
+  & > :nth-child(5) { animation-delay: 240ms; }
+  & > :nth-child(6) { animation-delay: 300ms; }
+  & > :nth-child(7) { animation-delay: 360ms; }
+  & > :nth-child(n + 8) { animation-delay: 420ms; }
+}
+
+@layer base {
+  body {
+    @apply bg-zinc-950 text-zinc-100 antialiased;
+  }
+
+  /* Every button eases its hover and gives a little on press. */
+  button {
+    @apply transition duration-200 ease-out;
+  }
+  button:not(:disabled) {
+    @apply active:scale-[0.97];
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}
