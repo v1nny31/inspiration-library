@@ -53,13 +53,13 @@ The root `AGENTS.md` should contain project-wide rules. Put subsystem-specific g
 ## 2. Project Overview
 
 - **What this project is:** A single-user library of website/app UI screenshots. Each entry has a name, category, tags and two copyable prompts (a UI brief for coding agents, a hero-image prompt for image generators).
-- **Main language(s):** PHP 8.3+ (backend), JavaScript/JSX (frontend).
-- **Tech stack:** `backend/`: Laravel 13 JSON API, SQLite, Pest, Pint. `frontend/`: Vite + React 19 + Tailwind CSS 4, Vitest + Testing Library, oxlint.
-- **Entry points:** `backend/routes/api.php`; `frontend/src/main.jsx` → `frontend/src/App.jsx`.
-- **Key directories:** `backend/app/Http/{Controllers/Api,Requests,Resources}`, `backend/tests/Feature/Api`; `frontend/src/api` (one file per resource over `client.js`), `frontend/src/pages` (one per route, see `App.jsx`), `frontend/src/components`, `frontend/src/lib/sections.js` (the tab list; mirrors `backend/app/Enums/Section.php`).
-- **Architecture / important boundaries:** The frontend only talks to `/api/*`. Screenshots are stored on the `public` disk and served from `/storage` (needs `php artisan storage:link`). There is no authentication: it is meant to run locally.
+- **Main language(s):** JavaScript/JSX.
+- **Tech stack:** `frontend/`: Vite + React 19 + Tailwind CSS 4, Vitest + Testing Library, oxlint. No database and no separate backend.
+- **Entry points:** `frontend/server/api.js` (the `/api/*` routes, a Vite plugin registered in `frontend/vite.config.js`); `frontend/src/main.jsx` → `frontend/src/App.jsx`.
+- **Key directories:** `frontend/server` (`library.js`: storage and validation; `api.js`: HTTP routes; `api.test.js`), `frontend/src/api` (one file per resource over `client.js`), `frontend/src/pages` (one per route, see `App.jsx`), `frontend/src/components`, `frontend/src/lib/sections.js` (the tab list, also read by the server).
+- **Architecture / important boundaries:** The React app only talks to `/api/*`, served by the Vite dev/preview server. All data lives as files in `library/` at the repo root (layout documented in `README.md` and at the top of `frontend/server/library.js`). That folder is committed and synced between devices through git, so its format is a contract: keep it human-readable, with one folder per screenshot so devices don't clash. Images are served from `/library/*`. There is no authentication: it is meant to run locally.
 - **Project language:** English.
-- **Supported environments:** Local development in WSL/Linux (PHP and Node both run inside WSL).
+- **Supported environments:** Local development in WSL/Linux (Node runs inside WSL).
 
 ### Repository facts to verify
 
@@ -82,12 +82,12 @@ Document the commands that are actually used by this project.
 
 | Task | Command |
 | --- | --- |
-| Install dependencies | `cd backend && composer setup` · `cd frontend && npm install` |
-| Run development server | `cd backend && ./vendor/bin/sail up -d` (Docker) or `composer dev` (local PHP; raises upload limits via `php.d/`), both on :8000 · `cd frontend && npm run dev` (:5173) |
-| Run tests | `cd backend && ./vendor/bin/pest` · `cd frontend && npm test` |
-| Run a single test | `./vendor/bin/pest --filter="stores a screenshot"` · `npx vitest run src/App.test.jsx` |
+| Install dependencies | `cd frontend && npm install` |
+| Run development server | `cd frontend && npm run dev` (:5173; also serves `/api` and `/library`) |
+| Run tests | `cd frontend && npm test` (Vitest projects: `app` in jsdom, `server` in Node) |
+| Run a single test | `npx vitest run src/App.test.jsx` · `npx vitest run --project server -t "stores a screenshot"` |
 | Lint | `cd frontend && npm run lint` |
-| Format | `cd backend && ./vendor/bin/pint` |
+| Format | none configured |
 | Type-check | none configured |
 | Build | `cd frontend && npm run build` |
 Use the project's real scripts/configuration rather than generic commands. If commands vary by package or directory, document that explicitly.

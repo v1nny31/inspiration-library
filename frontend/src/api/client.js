@@ -2,23 +2,23 @@
 // It builds the full URL, sends JSON or multipart bodies, and turns non-2xx
 // responses into a single, predictable error type.
 
-// Falls back to the local Laravel dev server if VITE_API_URL isn't set.
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+// Served by the Vite dev server itself (see server/api.js).
+export const API_BASE_URL = '/api';
 
 // Thrown for any non-2xx API response so callers can catch one error type
-// and still read the HTTP status and Laravel's validation error bag.
+// and still read the HTTP status and the validation error bag.
 export class ApiError extends Error {
   constructor(message, status, errors) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
-    // Laravel validation errors: { field: ['message', ...], ... }
+    // Validation errors: { field: ['message', ...], ... }
     this.errors = errors ?? null;
   }
 }
 
 /**
- * Call the Laravel JSON API.
+ * Call the library's JSON API.
  *
  * @param {string} path - endpoint path starting with "/", e.g. "/categories".
  * @param {object} [options]
@@ -45,7 +45,7 @@ export async function apiFetch(path, options = {}) {
   } catch {
     // fetch() itself throws when the server can't be reached at all.
     throw new ApiError(
-      `Couldn't reach the API at ${API_BASE_URL}. Make sure the backend is running (composer dev).`,
+      `Couldn't reach the API at ${API_BASE_URL}. Make sure the dev server is running (npm run dev).`,
       0,
     );
   }
@@ -62,7 +62,7 @@ export async function apiFetch(path, options = {}) {
   }
 
   if (!response.ok) {
-    // 413 comes from PHP itself, before Laravel runs, so it has no JSON body.
+    // A 413 may come from a proxy in front of the server, without a JSON body.
     const message =
       response.status === 413
         ? 'That file is too large for the server.'

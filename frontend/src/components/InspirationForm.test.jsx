@@ -13,8 +13,8 @@ vi.mock('../api/inspirations', () => ({
 }));
 
 const categories = [
-  { id: 1, name: 'Dashboard', inspirations_count: 3 },
-  { id: 2, name: 'Landing Page', inspirations_count: 1 },
+  { id: 'dashboard', name: 'Dashboard', inspirations_count: 3 },
+  { id: 'landing-page', name: 'Landing Page', inspirations_count: 1 },
 ];
 
 const screenshot = new File(['png-bytes'], 'shot.png', { type: 'image/png' });
@@ -37,7 +37,7 @@ describe('InspirationForm', () => {
 
   it('saves a screenshot with its details, creating a new category on the way', async () => {
     const user = userEvent.setup();
-    createCategory.mockResolvedValue({ id: 7, name: 'Pricing Page', inspirations_count: 0 });
+    createCategory.mockResolvedValue({ id: 'pricing-page', name: 'Pricing Page', inspirations_count: 0 });
     createInspiration.mockResolvedValue({ id: 99 });
     const { onSaved, onCategoryCreated } = renderForm();
 
@@ -59,7 +59,7 @@ describe('InspirationForm', () => {
       section: 'hero',
       name: 'Calm pricing page',
       website_url: 'https://calm.example.com/pricing',
-      category_id: 7,
+      category_id: 'pricing-page',
       tags: ['minimal', 'pastel'],
       hero_prompt: 'Soft pastel shapes',
       brief_prompt: 'Build a calm pricing page',
@@ -68,7 +68,7 @@ describe('InspirationForm', () => {
 
   it('adds a component without a hero image prompt', async () => {
     const user = userEvent.setup();
-    createCategory.mockResolvedValue({ id: 8, name: 'Pagination', inspirations_count: 0 });
+    createCategory.mockResolvedValue({ id: 'pagination', name: 'Pagination', inspirations_count: 0 });
     createInspiration.mockResolvedValue({ id: 50 });
     renderForm({ section: 'components', categories: [] });
 
@@ -89,7 +89,7 @@ describe('InspirationForm', () => {
       section: 'components',
       name: 'Numbered pagination',
       website_url: '',
-      category_id: 8,
+      category_id: 'pagination',
       tags: [],
       brief_prompt: 'Build numbered pagination',
     });
@@ -108,7 +108,7 @@ describe('InspirationForm', () => {
 
     await waitFor(() => expect(createInspiration).toHaveBeenCalled());
     expect(createCategory).not.toHaveBeenCalled();
-    expect(createInspiration.mock.calls[0][0].category_id).toBe(1);
+    expect(createInspiration.mock.calls[0][0].category_id).toBe('dashboard');
   });
 
   it('needs an image and a name before it can be added', async () => {
@@ -154,17 +154,17 @@ describe('InspirationForm', () => {
     const existing = {
       id: 5,
       name: 'Old name',
-      image_url: 'http://localhost:8000/storage/inspirations/a.png',
+      image_url: '/library/hero/a-1a2b3c/screenshot.png',
       website_url: 'https://old.example.com',
       tags: ['dark'],
       hero_prompt: 'hero',
       brief_prompt: 'brief',
-      category: { id: 1, name: 'Dashboard' },
+      category: { id: 'dashboard', name: 'Dashboard' },
     };
     const { onSaved } = renderForm({ inspiration: existing });
 
     expect(screen.queryByLabelText('Screenshot file')).not.toBeInTheDocument();
-    expect(screen.getByLabelText('Category')).toHaveValue('1');
+    expect(screen.getByLabelText('Category')).toHaveValue('dashboard');
     expect(screen.getByLabelText(/Website/)).toHaveValue('https://old.example.com');
 
     await user.clear(screen.getByLabelText('Name'));
@@ -177,7 +177,7 @@ describe('InspirationForm', () => {
     expect(updateInspiration).toHaveBeenCalledWith(5, {
       name: 'Renamed',
       website_url: '',
-      category_id: 1,
+      category_id: 'dashboard',
       tags: ['dark'],
       hero_prompt: 'hero',
       brief_prompt: 'brief',

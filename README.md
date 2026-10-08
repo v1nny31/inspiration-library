@@ -15,55 +15,75 @@ A personal library of website and app UI screenshots, built to feed AI agents be
 
 ## Stack
 
-| Folder | What |
-| --- | --- |
-| `backend/` | Laravel 13 JSON API, SQLite database, screenshots stored in `backend/storage/app/public/inspirations` |
-| `frontend/` | Vite + React + Tailwind CSS 4 |
+Vite + React 19 + Tailwind CSS 4, in `frontend/`. There is no database and no separate backend: a small Vite plugin (`frontend/server/`) serves a JSON API from the dev server and saves everything as plain files in `library/`, at the repo root (created on the first save).
 
 ## Setup (in WSL)
 
 ```bash
-# Backend, once
-cd backend
-composer setup                 # installs deps, creates .env + SQLite db, migrates, links /storage
-
-# Backend, every time: pick one
-./vendor/bin/sail up -d        # Docker (Sail), http://localhost:8000 — stop with ./vendor/bin/sail down
-composer dev                   # or local PHP, http://localhost:8000
-
-# Frontend (second terminal)
 cd frontend
 npm install
 npm run dev                    # http://localhost:5173
 ```
 
-- **Sail** needs Docker Desktop with WSL integration enabled for this distro. The app container publishes on `APP_PORT=8000` (set in `backend/.env`) and runs on PHP 8.5 with a 100 MB upload limit. With Sail running, prefix backend commands with `./vendor/bin/sail`, e.g. `./vendor/bin/sail artisan migrate` or `./vendor/bin/sail pest`.
-- **Local PHP**: use `composer dev`, not plain `php artisan serve`. It loads `backend/php.d/uploads.ini`, which raises PHP's 2 MB upload limit to 20 MB so full-page screenshots can be saved.
-- Both use the same SQLite file and the same `storage/` folder, so you can switch between them.
+The library only works through `npm run dev` (or `npm run build && npm run preview`): those are the servers that read and write `library/`. A static host serving `dist/` alone can show nothing.
 
-If the API runs somewhere other than `http://localhost:8000`, copy `frontend/.env.example` to `frontend/.env` and set `VITE_API_URL`.
+## Where your library lives
+
+Everything you add is saved in `library/`, which is meant to be committed:
+
+```text
+library/
+  links.json                     every link: section, url, created_at
+  hero/                          one folder per tab
+    categories.json              ["Dashboard", "Landing Page"]
+    neon-analytics-3f9a1c/       one folder per screenshot
+      info.json                  name, category, website_url, tags, prompts, created_at
+      screenshot.png
+  components/
+    categories.json
+    pill-button-8b02de/
+      info.json
+      screenshot.webp
+```
+
+### Syncing between devices
+
+Commit and push `library/` after adding things, and pull on the other device:
+
+```bash
+git add library && git commit -m "Add inspiration" && git push
+git pull                         # on the other device, then refresh the page
+```
+
+- Each screenshot is its own folder with a random suffix, so screenshots added on two devices never clash.
+- `categories.json` and `links.json` are shared files. If both devices change one before syncing, git may ask you to resolve a conflict in it. Until you do, the app shows an error naming the broken file.
+- A category used by a screenshot is shown even if it's missing from `categories.json`, so a merge never hides a screenshot.
+- Screenshots are capped at 20 MB each. GitHub refuses files over 100 MB, but a repo full of large images gets slow to clone. Consider [Git LFS](https://git-lfs.com) for `library/**/*.png` if it grows big.
+
+You can also edit `info.json` files by hand. Changes show up on the next page load.
 
 ## Using the library from agents
 
-Everything is available as JSON while the backend runs:
+Agents with file access can read `library/` directly: each `info.json` sits next to its screenshot.
+
+While `npm run dev` runs, everything is also available as JSON:
 
 | Request | Returns |
 | --- | --- |
 | `GET /api/categories` | categories with screenshot counts (`?section=hero` or `?section=components` for one tab) |
-| `GET /api/inspirations` | every entry, newest first (`?section=` and/or `?category={id}` to filter): section, name, category, tags, `image_url`, `website_url` (or null), `brief_prompt`, `hero_prompt` |
-| `GET /api/inspirations/{id}` | one entry |
+| `GET /api/inspirations` | every entry, newest first (`?section=` and/or `?category={category id}` to filter): section, name, category, tags, `image_url`, `website_url` (or null), `brief_prompt`, `hero_prompt` |
+| `GET /api/inspirations/{id}` | one entry (the id is its folder name) |
 | `GET /api/links` | inspiration website links, newest first (`?section=` to filter): section, `url`, `host` |
-
-The image files themselves are in `backend/storage/app/public/inspirations/` if an agent has file access.
 
 ## Tests
 
 ```bash
-cd backend && ./vendor/bin/pest      # API
-cd frontend && npm test              # components and API client
+cd frontend
+npm test                         # components, API client and the file-based API
+npm run lint
 ```
 
 ## Not included (yet)
 
-- Authentication. This is meant to run locally; add auth before putting it on a network.
+- Authentication. This is meant to run locally; don't expose the dev server on a network.
 - Replacing the image of an existing entry, and search.

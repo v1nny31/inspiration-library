@@ -74,7 +74,7 @@ export default function InspirationForm({ inspiration = null, section, categorie
 
   async function resolveCategoryId() {
     if (categoryValue !== NEW_CATEGORY) {
-      return categoryValue ? Number(categoryValue) : null;
+      return categoryValue || null;
     }
     const wanted = newCategoryName.trim();
     if (!wanted) {

@@ -1,18 +1,14 @@
-# Repo-wide view of what must never be committed. backend/ and frontend/
-# keep their own, more detailed .gitignore files.
+# Repo-wide view of what must never be committed. frontend/ keeps its own,
+# more detailed .gitignore. The library/ folder (screenshots and their JSON)
+# is meant to be committed.
 
-# Local environment and secrets (.env.example stays tracked)
+# Local environment and secrets
 .env
 .env.backup
 .env.production
 
-# Local SQLite database
-backend/database/*.sqlite*
-
-# Uploaded screenshots
-backend/storage/app/public/*
-!backend/storage/app/public/.gitignore
+# Half-written library files (they are renamed into place once complete)
+library/**/*.tmp
 
 # Dependencies
-backend/vendor/
 frontend/node_modules/

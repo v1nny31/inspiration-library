@@ -1,5 +1,6 @@
-// The library's tabs (backend: App\Enums\Section). Each has its own categories
-// and its own grid; these are the bits of wording and fields that differ.
+// The library's tabs. Each has its own categories, its own grid and its own
+// folder in library/ (server/library.js reads this list too); these are the
+// bits of wording and fields that differ.
 export const SECTIONS = [
   {
     id: 'hero',

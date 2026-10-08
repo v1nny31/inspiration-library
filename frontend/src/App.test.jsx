@@ -19,43 +19,43 @@ vi.mock('./api/inspirations', () => ({
   updateInspiration: vi.fn(),
 }));
 
-const dashboard = { id: 1, section: 'hero', name: 'Dashboard', inspirations_count: 1 };
-const landing = { id: 2, section: 'hero', name: 'Landing Page', inspirations_count: 1 };
-const buttons = { id: 3, section: 'components', name: 'Buttons', inspirations_count: 1 };
+const dashboard = { id: 'dashboard', section: 'hero', name: 'Dashboard', inspirations_count: 1 };
+const landing = { id: 'landing-page', section: 'hero', name: 'Landing Page', inspirations_count: 1 };
+const buttons = { id: 'buttons', section: 'components', name: 'Buttons', inspirations_count: 1 };
 
 const neon = {
-  id: 10,
+  id: 'neon-analytics-a1b2c3',
   section: 'hero',
   name: 'Neon analytics',
-  image_url: 'http://localhost:8000/storage/inspirations/neon.png',
+  image_url: '/library/hero/neon-analytics-a1b2c3/screenshot.png',
   website_url: 'https://neon.example.com',
   tags: ['dark mode', 'charts'],
   hero_prompt: 'A glowing data landscape',
   brief_prompt: 'Build a dark dashboard',
-  category: { id: 1, name: 'Dashboard' },
+  category: { id: 'dashboard', name: 'Dashboard' },
 };
 
 const saas = {
-  id: 11,
+  id: 'calm-saas-landing-d4e5f6',
   section: 'hero',
   name: 'Calm SaaS landing',
-  image_url: 'http://localhost:8000/storage/inspirations/saas.png',
+  image_url: '/library/hero/calm-saas-landing-d4e5f6/screenshot.png',
   website_url: null,
   tags: [],
   hero_prompt: null,
   brief_prompt: 'Build a calm landing page',
-  category: { id: 2, name: 'Landing Page' },
+  category: { id: 'landing-page', name: 'Landing Page' },
 };
 
 const pillButton = {
-  id: 12,
+  id: 'glowing-pill-button-0a1b2c',
   section: 'components',
   name: 'Glowing pill button',
-  image_url: 'http://localhost:8000/storage/inspirations/pill.png',
+  image_url: '/library/components/glowing-pill-button-0a1b2c/screenshot.png',
   tags: ['rounded'],
   hero_prompt: null,
   brief_prompt: 'Build a glowing pill button',
-  category: { id: 3, name: 'Buttons' },
+  category: { id: 'buttons', name: 'Buttons' },
 };
 
 describe('App', () => {
@@ -162,7 +162,7 @@ describe('App', () => {
   });
 
   it('collects screenshots without a category under "Uncategorized"', async () => {
-    const orphan = { ...saas, id: 99, name: 'Orphan hero', category: null };
+    const orphan = { ...saas, id: 'orphan-hero-3d4e5f', name: 'Orphan hero', category: null };
     listInspirations.mockResolvedValue([neon, orphan]);
     render(<App />);
 
@@ -171,7 +171,7 @@ describe('App', () => {
   });
 
   it('keeps empty categories on the page with a placeholder', async () => {
-    listCategories.mockResolvedValue([dashboard, { id: 5, section: 'hero', name: 'Mobile', inspirations_count: 0 }]);
+    listCategories.mockResolvedValue([dashboard, { id: 'mobile', section: 'hero', name: 'Mobile', inspirations_count: 0 }]);
     render(<App />);
 
     const mobile = await screen.findByRole('region', { name: 'Mobile' });
@@ -189,12 +189,12 @@ describe('App', () => {
 
     const index = screen.getByRole('complementary', { name: 'Categories index' });
     await user.click(within(index).getByRole('button', { name: /^Landing Page/ }));
-    expect(scrolledTo).toEqual(['category-2']);
+    expect(scrolledTo).toEqual(['category-landing-page']);
     expect(within(index).getByRole('button', { name: /^Landing Page/ })).toHaveAttribute('aria-current', 'location');
 
     const pills = screen.getByRole('navigation', { name: 'Categories' });
     await user.click(within(pills).getByRole('button', { name: /^Dashboard/ }));
-    expect(scrolledTo).toEqual(['category-2', 'category-1']);
+    expect(scrolledTo).toEqual(['category-landing-page', 'category-dashboard']);
     // Jumping never filters: every screenshot stays on the page.
     expect(screen.getByRole('button', { name: /Calm SaaS landing/ })).toBeInTheDocument();
   });
@@ -203,13 +203,13 @@ describe('App', () => {
     const user = userEvent.setup();
     listCategories.mockResolvedValue([]);
     listInspirations.mockResolvedValue([]);
-    createCategory.mockResolvedValue({ id: 7, section: 'hero', name: 'Footers', inspirations_count: 0 });
+    createCategory.mockResolvedValue({ id: 'footers', section: 'hero', name: 'Footers', inspirations_count: 0 });
     render(<App />);
 
     const index = screen.getByRole('complementary', { name: 'Categories index' });
     expect(await within(index).findByText('No categories yet')).toBeInTheDocument();
 
-    listCategories.mockResolvedValue([{ id: 7, section: 'hero', name: 'Footers', inspirations_count: 0 }]);
+    listCategories.mockResolvedValue([{ id: 'footers', section: 'hero', name: 'Footers', inspirations_count: 0 }]);
     await user.click(within(index).getByRole('button', { name: 'Add category' }));
     await user.type(within(index).getByRole('textbox', { name: 'New category name' }), 'Footers{Enter}');
 
@@ -244,7 +244,7 @@ describe('App', () => {
     await user.click(within(index).getByRole('button', { name: 'Delete category Dashboard' }));
 
     expect(window.confirm).toHaveBeenCalledWith(expect.stringContaining('Its 1 screenshot will stay in the library'));
-    await waitFor(() => expect(deleteCategory).toHaveBeenCalledWith(1));
+    await waitFor(() => expect(deleteCategory).toHaveBeenCalledWith('hero', 'dashboard'));
   });
 
   it('opens a popup with the details and copies each prompt', async () => {

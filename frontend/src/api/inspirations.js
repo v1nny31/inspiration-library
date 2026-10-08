@@ -1,10 +1,10 @@
-// Fetches for backend/routes/api.php -> Route::apiResource('inspirations', ...).
+// Fetches for the /api/inspirations routes in server/api.js.
 import { apiFetch } from './client';
 
 /**
  * GET /api/inspirations?section= — a section's screenshots, newest first.
  * @param {string} section - "hero" or "components".
- * @param {number|null} categoryId - only that category's screenshots when set.
+ * @param {string|null} categoryId - only that category's screenshots when set.
  */
 export async function listInspirations(section, categoryId = null) {
   const query = new URLSearchParams({ section });
@@ -16,7 +16,7 @@ export async function listInspirations(section, categoryId = null) {
 
 /**
  * POST /api/inspirations — upload a screenshot with its details.
- * @param {{ image: File, section: string, name: string, website_url?: string, category_id: number|null, tags: string[], hero_prompt?: string, brief_prompt: string }} input
+ * @param {{ image: File, section: string, name: string, website_url?: string, category_id: string|null, tags: string[], hero_prompt?: string, brief_prompt: string }} input
  */
 export async function createInspiration({ image, tags, ...fields }) {
   const form = new FormData();
@@ -33,10 +33,10 @@ export async function createInspiration({ image, tags, ...fields }) {
 
 /** PATCH /api/inspirations/{id} — update the details (the image stays the same). */
 export async function updateInspiration(id, fields) {
-  return (await apiFetch(`/inspirations/${id}`, { method: 'PATCH', body: fields })).data;
+  return (await apiFetch(`/inspirations/${encodeURIComponent(id)}`, { method: 'PATCH', body: fields })).data;
 }
 
-/** DELETE /api/inspirations/{id} — removes the record and its image file. */
+/** DELETE /api/inspirations/{id} — removes the screenshot's folder, image included. */
 export function deleteInspiration(id) {
-  return apiFetch(`/inspirations/${id}`, { method: 'DELETE' });
+  return apiFetch(`/inspirations/${encodeURIComponent(id)}`, { method: 'DELETE' });
 }

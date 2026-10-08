@@ -92,7 +92,7 @@ export default function LibraryPage({ section }) {
       return;
     }
     try {
-      await deleteCategory(category.id);
+      await deleteCategory(section, category.id);
       sounds.remove();
       reload();
     } catch (err) {

@@ -1,4 +1,4 @@
-// Fetches for backend/routes/api.php -> Route::apiResource('links', ...).
+// Fetches for the /api/links routes in server/api.js.
 import { apiFetch } from './client';
 
 /** GET /api/links — every link, newest first, each with its `section` and `host`. */
